@@ -36,7 +36,6 @@ const Calendar = ({ events: allEvents }) => {
     const [targetDate, setTargetDate] = useState(queryDate)
 
     useEffect(() => {
-        console.log(now.equals(targetDate))
         if (!queryDate.equals(targetDate)) {
             const url = new URL(window.location.href);
             url.searchParams.set('date', targetDate.toFormat("yyyy-MM-dd"));
@@ -84,8 +83,9 @@ const Calendar = ({ events: allEvents }) => {
                         const active = i >= dayOffset && daysInMonth > i - dayOffset
                         const tileDate = monthStart.plus({ days: i - dayOffset })
                         const events = allEvents.filter((event) => {
-                            const date = DateTime.fromJSDate(event.data.date);
-                            return tileDate.equals(date)
+                            const startDate = DateTime.fromISO(event.data.start).startOf('day');
+                            const endDate = DateTime.fromISO(event.data.end).endOf('day');
+                            return tileDate >= startDate && tileDate <= endDate
                         })
                         return <Tile key={i} day={tileDate.day} active={active} events={events} />
                     })

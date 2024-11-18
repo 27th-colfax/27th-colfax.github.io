@@ -19,9 +19,9 @@ const events = defineCollection({
 		title: z.string(),
 		description: z.string(),
 		location: z.string(),
-		date: z.coerce.date(),
-		published: z.coerce.date().optional(),
-		updated: z.coerce.date().optional(),
+		start: z.string(),
+		end: z.string(),
+		frequency: z.number().optional(),
 	}),
 })
 

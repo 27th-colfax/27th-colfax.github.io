@@ -13,18 +13,12 @@ const events = await getCollection("events");
 <html lang="en">
     <head>
         <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-        <!-- <script define:vars={{ events }}>
-            console.log({ events });
-            const urlParams = new URLSearchParams(window.location.search);
-            const dateParam = urlParams.get('date');
-        </script> -->
     </head>
     <body>
         <Header />
         <main>
             Page under construction 🔨
             <Calendar client:only events={events}/>
-            <!-- {events.map((event) => <div>{event.data.title}</div>)} -->
         </main>
         <Footer />
     </body>
