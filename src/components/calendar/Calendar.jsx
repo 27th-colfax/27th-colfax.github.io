@@ -44,6 +44,19 @@ const Calendar = ({ events: allEvents }) => {
         }
     }, [now, targetDate])
 
+    useEffect(() => {
+        const listener = (event) => {
+            const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+            if (key === 'ArrowRight') {
+                setTargetDate((currentDate) => currentDate.plus({ months: 1 }))
+            } else if (key === 'ArrowLeft') {
+                setTargetDate((currentDate) => currentDate.minus({ months: 1 }))
+            }
+        }
+        window.addEventListener('keydown', listener);
+        () => window.removeEventListener('keydown', listener)
+    }, [])
+
     const monthStart = targetDate.startOf("month");
     const monthEnd = targetDate.endOf("month");
 
@@ -53,12 +66,19 @@ const Calendar = ({ events: allEvents }) => {
 
     return (
         <div>
-            <div>
+            <div className="calendar-date-selector">
                 <button onClick={() => setTargetDate((currentDate) => currentDate.minus({ months: 1 }))}>{'<'}</button>
-                <div>{targetDate.monthLong}</div>
+                <div>{targetDate.year} {targetDate.monthLong}</div>
                 <button onClick={() => setTargetDate((currentDate) => currentDate.plus({ months: 1 }))}>{'>'}</button>
             </div>
             <div className="calendar">
+                <div>Sunday</div>
+                <div>Monday</div>
+                <div>Tuesday</div>
+                <div>Wednesday</div>
+                <div>Thursday</div>
+                <div>Friday</div>
+                <div>Saturday</div>
                 {
                     Array.from({ length: weeks * 7 }).map((_, i) => {
                         const active = i >= dayOffset && daysInMonth > i - dayOffset

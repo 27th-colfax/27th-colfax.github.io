@@ -1,10 +1,15 @@
+.calendar-date-selector {
+    display: flex;
+    justify-content: space-between;
+}
+
 .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
 }
 
 .tile {
-    width: 100px;
+    width: 100%;
     border: solid 1px black;
     height: 100px;
 }
