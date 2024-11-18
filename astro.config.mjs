@@ -4,8 +4,10 @@ import mdx from '@astrojs/mdx';
 
 import sitemap from '@astrojs/sitemap';
 
+import react from '@astrojs/react';
+
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://27th-colfax.github.io',
-	integrations: [mdx(), sitemap()],
+    site: 'https://27th-colfax.github.io',
+    integrations: [mdx(), sitemap(), react()],
 });
