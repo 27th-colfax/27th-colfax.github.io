@@ -15,6 +15,8 @@ const Tile = ({ active, day, events }) => {
     </div>
 }
 
+const frequencyUnits = ['days', 'weeks', 'months', 'years']
+
 const Calendar = ({ events: allEvents }) => {
     const now = DateTime.now()
 
@@ -85,7 +87,33 @@ const Calendar = ({ events: allEvents }) => {
                         const events = allEvents.filter((event) => {
                             const startDate = DateTime.fromISO(event.data.start).startOf('day');
                             const endDate = DateTime.fromISO(event.data.end).endOf('day');
-                            return tileDate >= startDate && tileDate <= endDate
+                            if (tileDate >= startDate && tileDate <= endDate) {
+                                return true
+                            }
+                            const frequencies = event.data.frequency
+                            const count = event.data.count
+                            if (frequencies != null) {
+                                return frequencyUnits.some((unit) => {
+                                    const value = frequencies[unit]
+                                    if (value == null) {
+                                        return false
+                                    }
+                                    const iteration = Math.floor(tileDate.diff(startDate, [unit])[unit] / value)
+                                    if (count != null && iteration >= event.data.count) {
+                                        return false
+                                    }
+                                    const offset = { [unit]: Math.max(iteration * value, 0) }
+
+                                    const offsetStartDate = startDate.plus(offset)
+                                    const offsetEndDate = endDate.plus(offset)
+
+                                    if (tileDate >= offsetStartDate && tileDate <= offsetEndDate) {
+                                        return true
+                                    }
+                                })
+                            }
+
+                            return false
                         })
                         return <Tile key={i} day={tileDate.day} active={active} events={events} />
                     })

@@ -21,7 +21,13 @@ const events = defineCollection({
 		location: z.string(),
 		start: z.string(),
 		end: z.string(),
-		frequency: z.number().optional(),
+		frequency: z.object({
+			days: z.number().optional(),
+			weeks: z.number().optional(),
+			months: z.number().optional(),
+			years: z.number().optional(),
+		}).optional(),
+		count: z.number().optional(),
 	}),
 })
 
