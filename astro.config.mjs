@@ -6,6 +6,6 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://example.com',
+	site: 'https://27th-colfax.github.io/',
 	integrations: [mdx(), sitemap()],
 });
