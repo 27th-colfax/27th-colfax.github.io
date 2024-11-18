@@ -61,7 +61,7 @@ const Calendar = ({ events: allEvents }) => {
             <div className="calendar">
                 {
                     Array.from({ length: weeks * 7 }).map((_, i) => {
-                        const active = i > dayOffset && daysInMonth > i - dayOffset
+                        const active = i >= dayOffset && daysInMonth > i - dayOffset
                         const tileDate = monthStart.plus({ days: i - dayOffset })
                         const events = allEvents.filter((event) => {
                             const date = DateTime.fromJSDate(event.data.date);
