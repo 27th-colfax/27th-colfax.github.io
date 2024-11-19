@@ -26,6 +26,236 @@ const getWeekDay = (weekday) => {
     }
 }
 
+const matchesConfiguration = ({
+    event,
+    date,
+}) => {
+    const startDate = DateTime.fromISO(event.data.start).startOf('day');
+
+    if (date.equals(startDate)) {
+        return true
+    }
+
+    if (event.data.frequency != null) {
+        const frequency = event.data.frequency
+        const count = event.data.count
+
+        if (frequency.days != null) {
+            const answer = matchesDayConfiguration({
+                date,
+                startDate,
+                daysInterval: frequency.days,
+                count,
+            })
+            if (answer != null) {
+                return answer
+            }
+        } else if (frequency.weekly != null) {
+            const answer = matchesWeekConfiguration({
+                date,
+                startDate,
+                weeksInterval: frequency.weekly.weeks,
+                daysOfWeek: frequency.weekly.days,
+                count,
+            })
+            if (answer != null) {
+                return answer
+            }
+        } else if (frequency.monthly != null) {
+            if (frequency.monthly.weekdays != null) {
+                const answer = matchesMonthWeekdayConfiguration({
+                    date,
+                    startDate,
+                    weekdays: frequency.monthly.weekdays,
+                    monthsInterval: frequency.monthly.months,
+                    count,
+                })
+                if (answer != null) {
+                    return answer
+                }
+            }
+            else {
+                const answer = matchesMonthDayConfiguration({
+                    date,
+                    startDate,
+                    monthsInterval: frequency.monthly.months,
+                    days: frequency.monthly.days,
+                    count,
+                })
+                if (answer != null) {
+                    return answer
+                }
+            }
+        } else if (frequency.years != null) {
+            matchesYearConfiguration({
+                date,
+                startDate,
+                years: frequency.yearly,
+                count,
+            })
+        }
+    }
+}
+
+const matchesDayConfiguration = ({
+    date,
+    startDate,
+    daysInterval: rawDaysInterval,
+    count,
+}) => {
+    const daysInterval = rawDaysInterval ?? 1
+    const elapsed = Math.floor(date.diff(startDate, ['days']).days / daysInterval)
+    if (count != null && elapsed >= count) {
+        return false
+    }
+    const offset = { days: Math.max(elapsed * daysInterval, 0) }
+    const offsetStartDate = startDate.plus(offset)
+
+    if (date.equals(offsetStartDate)) {
+        return true
+    }
+}
+
+const matchesWeekConfiguration = ({
+    date,
+    startDate,
+    weeksInterval: rawWeeksInterval,
+    daysOfWeek: rawDaysOfWeek,
+    count,
+}) => {
+    const weeksInterval = rawWeeksInterval ?? 1
+    const daysOfWeek = rawDaysOfWeek?.map(getWeekDay) ?? [startDate.weekday]
+
+    const startWeek = startDate.startOf('week')
+    const dateWeek = date.startOf('week')
+
+    const intervalsElapsed = Math.floor(dateWeek.diff(startWeek, ['weeks']).weeks / weeksInterval)
+
+    const intervalWeek = startWeek.plus({ weeks: intervalsElapsed * weeksInterval })
+
+    const daysThroughInterval = date.diff(intervalWeek, ['days']).days + 1
+
+    const startDateAdjustment = daysOfWeek.filter((dayOfWeek) => dayOfWeek < startDate.weekday).length
+    const daysElapsedInCurrentWeek = daysOfWeek.filter((dayOfWeek) => dayOfWeek <= daysThroughInterval).length
+    const intervalsDays = daysOfWeek.length * intervalsElapsed
+    const daysElapsed = intervalsDays + daysElapsedInCurrentWeek - startDateAdjustment
+
+    if (count != null && daysElapsed > count) {
+        return false
+    }
+
+    const offsetWeekStart = startDate.startOf('week').plus({ weeks: intervalsElapsed * weeksInterval })
+
+    return daysOfWeek.some((dayOfWeek) => {
+        const weekday = offsetWeekStart.plus({ days: dayOfWeek - 1 })
+        return date.equals(weekday) && weekday > startDate
+    })
+}
+
+const matchesMonthWeekdayConfiguration = ({
+    date,
+    startDate,
+    monthsInterval: rawMonthsInterval,
+    weekdays,
+    count,
+}) => {
+    const monthsInterval = rawMonthsInterval ?? 1
+    const defaultWeek = Math.floor(startDate.day / 7)
+
+    const startMonth = startDate.startOf('month')
+    const dateMonth = date.startOf('month')
+
+    const weekDayOffsets = weekdays.length == 0 ? [
+        (7 * defaultWeek) + (startDate.weekday - dateMonth.weekday + 7) % 7
+    ] : weekdays.map(({ week, weekday }) => {
+        return (7 * (week ?? defaultWeek)) + ((weekday == null ? startDate.weekday : getWeekDay(weekday)) - dateMonth.weekday + 7) % 7
+    })
+
+    const intervalsElapsed = Math.ceil(-startDate.diff(dateMonth, ["months"]).months / monthsInterval)
+
+    const intervalMonth = startMonth.plus({ months: intervalsElapsed * monthsInterval })
+
+    const daysThroughInterval = date.diff(intervalMonth, ['days']).days + 1
+
+    const startDateAdjustment = weekDayOffsets.filter((weekday) => weekday < startDate.day).length
+    const daysElapsedInCurrentInterval = weekDayOffsets.filter((weekday) => weekday <= daysThroughInterval).length
+    const intervalsDays = weekDayOffsets.length * intervalsElapsed
+    const daysElapsed = intervalsDays + daysElapsedInCurrentInterval - startDateAdjustment
+
+    // TODO: check this is working
+    if (count != null && daysElapsed > count) {
+        return false
+    }
+
+    const offsetMonth = startMonth.plus({ months: intervalsElapsed * monthsInterval })
+
+    return weekDayOffsets.some((weekDayOffset) => {
+        const monthDate = offsetMonth.plus({ days: weekDayOffset })
+
+        return date.equals(monthDate) && monthDate > startDate
+    })
+}
+
+const matchesMonthDayConfiguration = ({
+    date,
+    startDate,
+    days: rawDays,
+    monthsInterval: rawMonthsInterval,
+    count,
+}) => {
+    const monthsInterval = rawMonthsInterval ?? 1
+
+    // when given the 10th day of a month 2nd is selected for some reason
+    const days = rawDays ?? [startDate.day]
+
+    const startMonth = startDate.startOf('month')
+    const dateMonth = date.startOf('month')
+
+    const intervalsElapsed = Math.ceil(-startDate.diff(dateMonth, ["months"]).months / monthsInterval)
+
+    const intervalMonth = startMonth.plus({ months: intervalsElapsed * monthsInterval })
+
+    const daysThroughInterval = date.diff(intervalMonth, ['days']).days + 1
+
+    // logic on these needs to be checked
+    const startDateAdjustment = days.filter((day) => day < startDate.day).length
+    const daysElapsedInCurrentInterval = days.filter((day) => day <= daysThroughInterval).length
+    const intervalsDays = days.length * intervalsElapsed
+    const daysElapsed = intervalsDays + daysElapsedInCurrentInterval - startDateAdjustment
+
+    // TODO: check this is working
+    if (count != null && daysElapsed > count) {
+        return false
+    }
+
+    const offsetMonthStart = startDate.startOf('month').plus({ months: intervalsElapsed * monthsInterval })
+
+    return days.some((day) => {
+        const monthDay = offsetMonthStart.plus({ days: day - 1 })
+        return date.equals(monthDay) && monthDay > startDate
+    })
+}
+
+const matchesYearConfiguration = ({
+    date,
+    startDate,
+    years: rawYears,
+    count,
+}) => {
+    const years = rawYears ?? 1
+
+    const elapsed = Math.floor(date.diff(startDate, ['years']).years / years)
+    if (count != null && elapsed >= count) {
+        return false
+    }
+    const offset = { years: Math.max(elapsed * years, 0) }
+    const offsetStartDate = startDate.plus(offset)
+
+    if (date.equals(offsetStartDate)) {
+        return true
+    }
+}
+
 const Calendar = ({ events: allEvents }) => {
     const now = DateTime.now()
 
@@ -77,138 +307,9 @@ const Calendar = ({ events: allEvents }) => {
     const events = Array.from({ length: weeks * 7 }).flatMap((_, i) => {
         const date = monthStart.plus({ days: i - dayOffset })
         return allEvents.filter((event) => {
-            const startDate = DateTime.fromISO(event.data.start).startOf('day');
-            if (date.equals(startDate)) {
-                return true
-            }
-
-            if (event.data.frequency != null) {
-                const frequency = event.data.frequency
-                const count = event.data.count
-
-                if (frequency.days != null) {
-                    const elapsed = Math.floor(date.diff(startDate, ['days']).days / frequency.days)
-                    if (count != null && elapsed >= count) {
-                        return false
-                    }
-                    const offset = { days: Math.max(elapsed * frequency.days, 0) }
-                    const offsetStartDate = startDate.plus(offset)
-
-                    if (date.equals(offsetStartDate)) {
-                        return true
-                    }
-                } else if (frequency.weekly != null) {
-                    const weeksInterval = frequency.weekly.weeks ?? 1
-                    const daysOfWeek = frequency.weekly.days?.map(getWeekDay) ?? [startDate.weekday]
-
-                    const startWeek = startDate.startOf('week')
-                    const dateWeek = date.startOf('week')
-
-                    const intervalsElapsed = Math.floor(dateWeek.diff(startWeek, ['weeks']).weeks / weeksInterval)
-
-                    const intervalWeek = startWeek.plus({ weeks: intervalsElapsed * weeksInterval })
-
-                    const daysThroughInterval = date.diff(intervalWeek, ['days']).days + 1
-
-                    const startDateAdjustment = daysOfWeek.filter((dayOfWeek) => dayOfWeek < startDate.weekday).length
-                    const daysElapsedInCurrentWeek = daysOfWeek.filter((dayOfWeek) => dayOfWeek <= daysThroughInterval).length
-                    const intervalsDays = daysOfWeek.length * intervalsElapsed
-                    const daysElapsed = intervalsDays + daysElapsedInCurrentWeek - startDateAdjustment
-
-                    if (count != null && daysElapsed > count) {
-                        return false
-                    }
-
-                    const offsetWeekStart = startDate.startOf('week').plus({ weeks: intervalsElapsed * weeksInterval })
-
-                    return daysOfWeek.some((dayOfWeek) => {
-                        const weekday = offsetWeekStart.plus({ days: dayOfWeek - 1 })
-                        return date.equals(weekday) && weekday > startDate
-                    })
-                } else if (frequency.monthly != null) {
-                    const monthsInterval = frequency.monthly.months ?? 1
-
-                    if (frequency.monthly.weekdays != null) {
-                        const defaultWeekday = startDate.weekday
-                        const defaultWeek = Math.floor(startDate.day / 7)
-
-                        const startMonth = startDate.startOf('month')
-                        const dateMonth = date.startOf('month')
-
-                        const monthDays = frequency.monthly.weekdays.length == 0 ? [
-                            (7 * defaultWeek) + (startDate.weekday - dateMonth.weekday + 7) % 7
-                        ] : frequency.monthly.weekdays.map(({ week, weekday }) => {
-                            return (7 * (week ?? defaultWeek)) + (weekday == null ? defaultWeekday : getWeekDay(weekday)) - (dateMonth.weekday % 7)
-                        })
-
-                        const intervalsElapsed = Math.ceil(-startDate.diff(dateMonth, ["months"]).months / monthsInterval)
-
-                        const intervalMonth = startMonth.plus({ months: intervalsElapsed * monthsInterval })
-
-                        const daysThroughInterval = date.diff(intervalMonth, ['days']).days + 1
-
-                        const startDateAdjustment = monthDays.filter((weekday) => weekday < startDate.day).length
-                        const daysElapsedInCurrentInterval = monthDays.filter((weekday) => weekday <= daysThroughInterval).length
-                        const intervalsDays = monthDays.length * intervalsElapsed
-                        const daysElapsed = intervalsDays + daysElapsedInCurrentInterval - startDateAdjustment
-
-                        // TODO: check this is working
-                        if (count != null && daysElapsed > count) {
-                            return false
-                        }
-
-                        const offsetMonth = startMonth.plus({ months: intervalsElapsed * monthsInterval })
-
-                        return monthDays.some((monthDay) => {
-                            const monthDate = offsetMonth.plus({ days: monthDay })
-                            
-                            return date.equals(monthDate) && monthDate > startDate
-                        })
-                    }
-                    else {
-                        // when given the 10th day of a month 2nd is selected for some reason
-                        const days = frequency.monthly.days ?? [startDate.day]
-
-                        const startMonth = startDate.startOf('month')
-                        const dateMonth = date.startOf('month')
-
-                        const intervalsElapsed = Math.ceil(-startDate.diff(dateMonth, ["months"]).months / monthsInterval)
-
-                        const intervalMonth = startMonth.plus({ months: intervalsElapsed * monthsInterval })
-
-                        const daysThroughInterval = date.diff(intervalMonth, ['days']).days + 1
-
-                        // logic on these needs to be checked
-                        const startDateAdjustment = days.filter((day) => day < startDate.day).length
-                        const daysElapsedInCurrentInterval = days.filter((day) => day <= daysThroughInterval).length
-                        const intervalsDays = days.length * intervalsElapsed
-                        const daysElapsed = intervalsDays + daysElapsedInCurrentInterval - startDateAdjustment
-
-                        // TODO: check this is working
-                        if (count != null && daysElapsed > count) {
-                            return false
-                        }
-
-                        const offsetMonthStart = startDate.startOf('month').plus({ months: intervalsElapsed * monthsInterval })
-
-                        return days.some((day) => {
-                            const monthDay = offsetMonthStart.plus({ days: day - 1 })
-                            return date.equals(monthDay) && monthDay > startDate
-                        })
-                    }
-                } else if (frequency.years != null) {
-                    const elapsed = Math.floor(date.diff(startDate, ['years']).years / frequency.years)
-                    if (count != null && elapsed >= count) {
-                        return false
-                    }
-                    const offset = { years: Math.max(elapsed * frequency.years, 0) }
-                    const offsetStartDate = startDate.plus(offset)
-
-                    if (date.equals(offsetStartDate)) {
-                        return true
-                    }
-                }
-            }
+            return matchesConfiguration({
+                event, date,
+            })
         }).map((event) => {
             const start = DateTime.fromISO(event.data.start);
             const startDate = start.startOf('day')
