@@ -61,7 +61,7 @@ const Calendar = ({ events: allEvents }) => {
     const monthStart = targetDate.startOf("month");
     const monthEnd = targetDate.endOf("month");
 
-    const dayOffset = monthStart.weekday - 1;
+    const dayOffset = monthStart.weekday;
     const daysInMonth = monthEnd.day;
     const weeks = Math.ceil((monthEnd.day + dayOffset) / 7);
 
