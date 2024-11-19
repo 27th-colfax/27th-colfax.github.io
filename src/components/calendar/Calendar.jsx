@@ -26,6 +26,26 @@ const getWeekDay = (weekday) => {
     }
 }
 
+const eventForDate = ({
+    date,
+    event,
+}) => {
+    const start = DateTime.fromISO(event.data.start);
+    const startDate = start.startOf('day')
+    const end = DateTime.fromISO(event.data.end);
+
+    const dateOffset = date.diff(startDate)
+
+    return {
+        ...event,
+        data: {
+            ...event.data,
+            start: start.plus(dateOffset),
+            end: end.plus(dateOffset),
+        }
+    }
+}
+
 const matchesConfiguration = ({
     event,
     date,
@@ -308,23 +328,12 @@ const Calendar = ({ events: allEvents }) => {
         const date = monthStart.plus({ days: i - dayOffset })
         return allEvents.filter((event) => {
             return matchesConfiguration({
-                event, date,
+                date, event,
             })
         }).map((event) => {
-            const start = DateTime.fromISO(event.data.start);
-            const startDate = start.startOf('day')
-            const end = DateTime.fromISO(event.data.end);
-
-            const dateOffset = date.diff(startDate)
-
-            return {
-                ...event,
-                data: {
-                    ...event.data,
-                    start: start.plus(dateOffset),
-                    end: end.plus(dateOffset),
-                }
-            }
+            return eventForDate({
+                date, event,
+            })
         })
     })
 
