@@ -23,9 +23,21 @@ const events = defineCollection({
 		end: z.string(),
 		frequency: z.object({
 			days: z.number().optional(),
-			weeks: z.number().optional(),
-			months: z.number().optional(),
-			years: z.number().optional(),
+			weekly: z.object({
+				days: z.array(z.string()).optional(),
+				weeks: z.number().optional(),
+			}).optional(),
+			monthly: z.object({
+				months: z.number().optional(),
+				days: z.array(z.number()).optional(),
+				weekdays: z.array(
+					z.object({
+						weekday: z.string().optional(),
+						week: z.number().optional(),
+					})
+				).optional(),
+			}).optional(),
+			years: z.number().optional()
 		}).optional(),
 		count: z.number().optional(),
 	}),
