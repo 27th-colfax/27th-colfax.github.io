@@ -8,7 +8,17 @@ const Tile = ({ active, day, events }) => {
         {day}
         {
             events.map((event) => {
-                return <div key={`${event.slug}-${event.data.start.toFormat("yyyy-MM-dd")}`}>{event.data.title}</div>
+                let queryParams = {
+                    day: event.data.start.toFormat('yyyy-MM-dd')
+                };
+
+                // remove undefined and null values
+                const queryString = new URLSearchParams(
+                    Object.fromEntries(Object.entries(queryParams).filter(([_, v]) => v != null))
+                ).toString();
+
+
+                return <a href={`/event/${event.slug}?${queryString}`} key={`${event.slug}-${event.data.start.toFormat("yyyy-MM-dd")}`}>{event.data.title}</a>
             })
         }
     </div>

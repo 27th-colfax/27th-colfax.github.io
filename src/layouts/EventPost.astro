@@ -1,0 +1,15 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+type Props = CollectionEntry<"events">["data"];
+
+const { title, description, location, start, end, frequency, count } =
+    Astro.props;
+---
+
+<html lang="en">
+    <head> </head>
+    <body>
+        {title}
+    </body>
+</html>
