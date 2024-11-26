@@ -12,8 +12,6 @@ import type { Render } from "astro:content";
 export async function getStaticPaths() {
     const events = await getCollection("events");
 
-    console.log(events)
-
     const oldestEventDate = events
         .map((event) => DateTime.fromISO(event.data.start))
         .reduce((a, b) => (a < b ? a : b));
