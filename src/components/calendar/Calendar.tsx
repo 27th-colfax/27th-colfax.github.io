@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 
 import './Calendar.css';
 import { useEffect, useMemo, useState } from "react";
-import { eventForDate, matchesConfiguration, type CalendarEvent, type RawCalendarEvent } from "./helpers";
+import { eventCanceled, eventForDate, eventMissed, matchesConfiguration, type CalendarEvent, type RawCalendarEvent } from "./helpers";
 
 const Tile = ({ active, day, events }: {
     active: boolean,
@@ -88,6 +88,8 @@ const Calendar = ({ events: allEvents }: {
             return matchesConfiguration({
                 date, event: event.data,
             })
+                && !eventMissed({ date, missedDates: event.data.series?.missedDates })
+                && !eventCanceled({ date, canceledDates: event.data.series?.canceledDates })
         }).map((event) => {
             return {
                 slug: event.slug,

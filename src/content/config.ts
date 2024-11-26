@@ -47,6 +47,10 @@ const events = defineCollection({
 			}),
 			count: z.number().optional(),
 			end: z.string().optional(),
+			// dates that are intentionally being left out (not subtracted from count)
+			canceledDates: z.array(z.string()).optional(),
+			// dates that are accidentally left out (still subtracted from count)
+			missedDates: z.array(z.string()).optional(),
 		}).optional(),
 	}),
 })

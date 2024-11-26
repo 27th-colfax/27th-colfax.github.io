@@ -1,4 +1,4 @@
-import { DateTime, Interval } from "luxon";
+import { DateTime } from "luxon";
 
 
 const getWeekDay = (weekday: string) => {
@@ -34,6 +34,8 @@ type EventSeries = {
     } | undefined;
     count: number | undefined;
     end: DateTime | undefined,
+    canceledDates: DateTime[] | undefined;
+    missedDates: DateTime[] | undefined;
 }
 
 export type CalendarEvent = {
@@ -61,7 +63,9 @@ type RawEventSeries = {
         years: number | undefined;
     } | undefined;
     count: number | undefined;
-    end: string | undefined,
+    end: string | undefined;
+    canceledDates: string[] | undefined;
+    missedDates: string[] | undefined;
 }
 
 export type RawCalendarEvent = {
@@ -96,6 +100,18 @@ export const eventForDate = ({
     }
 }
 
+export const eventCanceled = ({date, canceledDates}: {date: DateTime, canceledDates: string[] | undefined}) => {
+    return canceledDates?.some((canceledDate) => {
+        return DateTime.fromISO(canceledDate).equals(date)
+    }) ?? false
+}
+
+export const eventMissed = ({date, missedDates}: {date: DateTime, missedDates: string[] | undefined}) => {
+    return missedDates?.some((missedDate) => {
+        return DateTime.fromISO(missedDate).equals(date)
+    }) ?? false
+}
+
 export const matchesConfiguration = ({
     date,
     event,
@@ -111,7 +127,10 @@ export const matchesConfiguration = ({
 
     if (event.series?.frequency != null) {
         const frequency = event.series.frequency
-        const count = event.series.count
+        const canceledCount = event.series.canceledDates == null ? 0 : event.series.canceledDates.filter((canceledDate) => (
+            DateTime.fromISO(canceledDate) < date
+        )).length
+        const count = event.series.count == null ? undefined : event.series.count - canceledCount
         const rawSeriesEnd = event.series.end
 
         if (rawSeriesEnd != null) {
@@ -176,6 +195,7 @@ export const matchesConfiguration = ({
             })
         }
     }
+    return false
 }
 
 const matchesDayConfiguration = ({

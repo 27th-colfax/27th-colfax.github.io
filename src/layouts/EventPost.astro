@@ -14,6 +14,8 @@ type Props = {
     locationMap: string;
     locationLink: string;
     locationWebsite: string;
+    canceled: boolean;
+    missed: boolean;
     interval: {
         start: DateTime;
         end: DateTime;
@@ -29,6 +31,8 @@ const {
     locationMap,
     locationLink,
     locationWebsite,
+    canceled,
+    missed,
     interval: { start, end },
 } = Astro.props;
 ---

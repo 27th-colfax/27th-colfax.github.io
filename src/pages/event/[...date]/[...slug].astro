@@ -5,6 +5,8 @@ import { DateTime } from "luxon";
 import {
     eventForDate,
     matchesConfiguration,
+    eventCanceled,
+    eventMissed,
     type RawCalendarEvent,
 } from "../../../components/calendar";
 import type { Render } from "astro:content";
@@ -37,14 +39,27 @@ export async function getStaticPaths() {
                 const { slug, data: rawData, render } = rawEvent;
                 const { start, end, series, ...data } = rawData;
 
+                const interval = eventForDate({
+                    date,
+                    originalInterval: { start, end },
+                });
+
+                const canceled = eventCanceled({
+                    date,
+                    canceledDates: series?.canceledDates,
+                });
+                const missed = eventMissed({
+                    date,
+                    missedDates: series?.missedDates,
+                });
+
                 return {
                     params: { slug: slug, date: formattedDate },
                     props: {
                         ...data,
-                        interval: eventForDate({
-                            date,
-                            originalInterval: { start, end },
-                        }),
+                        interval,
+                        canceled,
+                        missed,
                         render,
                     },
                 };
@@ -61,6 +76,8 @@ type Props = {
     locationMap: string;
     locationLink: string;
     locationWebsite: string;
+    canceled: boolean;
+    missed: boolean;
     interval: {
         start: DateTime;
         end: DateTime;
