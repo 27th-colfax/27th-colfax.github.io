@@ -1,4 +1,4 @@
-import { DateTime, type DayNumbers } from "luxon";
+import { DateTime } from "luxon";
 
 import './Calendar.css';
 import { useEffect, useMemo, useState } from "react";
