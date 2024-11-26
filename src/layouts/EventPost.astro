@@ -1,14 +1,25 @@
 ---
-import type { CollectionEntry } from "astro:content";
-import EventDate from "../components/EventDate";
 import type { RawCalendarEvent } from "../components/calendar";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
+import { DateTime } from "luxon";
 
-type Props = CollectionEntry<"events">["data"];
+type Props = {
+    title: string;
+    description: string;
+    headerImage: string;
+    locationAddress: string;
+    locationName: string;
+    locationMap: string;
+    locationLink: string;
+    locationWebsite: string;
+    interval: {
+        start: DateTime;
+        end: DateTime;
+    };
+};
 
-const event = Astro.props;
 const {
     title,
     description,
@@ -18,7 +29,8 @@ const {
     locationMap,
     locationLink,
     locationWebsite,
-} = event;
+    interval: { start, end },
+} = Astro.props;
 ---
 
 <html lang="en">
@@ -83,35 +95,38 @@ const {
                 <div class="prose">
                     <div class="title">
                         <div class="date">
-                            <EventDate
-                                client:only="react"
-                                event={event as RawCalendarEvent}
-                            />
+                            <div>
+                                {start.toLocaleString(DateTime.DATE_FULL)} - {
+                                    end.toLocaleString(DateTime.DATE_FULL)
+                                }
+                            </div>
+                            <!-- TODO: make a location component that looks nice no matter the inputs -->
+                            <div class="location">
+                                {
+                                    locationName && (
+                                        <div class="name">{locationName}</div>
+                                    )
+                                }
+                                {
+                                    locationMap ? (
+                                        <a class="address" href={locationMap}>
+                                            {locationAddress}
+                                        </a>
+                                    ) : (
+                                        <div class="address">
+                                            {locationAddress}
+                                        </div>
+                                    )
+                                }
+                            </div>
+                            <h1>{title}</h1>
+                            <hr />
                         </div>
-                        <!-- TODO: make a location component that looks nice no matter the inputs -->
-                        <div class="location">
-                            {
-                                locationName && (
-                                    <div class="name">{locationName}</div>
-                                )
-                            }
-                            {
-                                locationMap ? (
-                                    <a class="address" href={locationMap}>
-                                        {locationAddress}
-                                    </a>
-                                ) : (
-                                    <div class="address">{locationAddress}</div>
-                                )
-                            }
-                        </div>
-                        <h1>{title}</h1>
-                        <hr />
+                        <slot />
                     </div>
-                    <slot />
                 </div>
             </article>
+            <Footer />
         </main>
-        <Footer />
     </body>
 </html>

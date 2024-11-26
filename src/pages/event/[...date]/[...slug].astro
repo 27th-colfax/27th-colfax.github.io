@@ -1,0 +1,79 @@
+---
+import { getCollection } from "astro:content";
+import Event from "../../../layouts/EventPost.astro";
+import { DateTime } from "luxon";
+import {
+    eventForDate,
+    matchesConfiguration,
+    type RawCalendarEvent,
+} from "../../../components/calendar";
+import type { Render } from "astro:content";
+
+export async function getStaticPaths() {
+    const events = await getCollection("events");
+
+    console.log(events)
+
+    const oldestEventDate = events
+        .map((event) => DateTime.fromISO(event.data.start))
+        .reduce((a, b) => (a < b ? a : b));
+    const startDate = oldestEventDate.startOf("month").startOf("day");
+    const endDate = DateTime.now()
+        .plus({ years: 1 })
+        .startOf("day")
+        .endOf("year");
+
+    const days = Math.ceil(endDate.diff(startDate, ["day"]).days);
+
+    return Array.from({ length: days }).flatMap((_, i) => {
+        const date = startDate.plus({ days: i });
+        const formattedDate = date.toFormat("yyyy-MM-dd");
+        return events
+            .filter((event) => {
+                return matchesConfiguration({
+                    date,
+                    event: event.data as RawCalendarEvent,
+                });
+            })
+            .map((rawEvent) => {
+                const { slug, data: rawData, render } = rawEvent;
+                const { start, end, series, ...data } = rawData;
+
+                return {
+                    params: { slug: slug, date: formattedDate },
+                    props: {
+                        ...data,
+                        interval: eventForDate({
+                            date,
+                            originalInterval: { start, end },
+                        }),
+                        render,
+                    },
+                };
+            });
+    });
+}
+
+type Props = {
+    title: string;
+    description: string;
+    headerImage: string;
+    locationAddress: string;
+    locationName: string;
+    locationMap: string;
+    locationLink: string;
+    locationWebsite: string;
+    interval: {
+        start: DateTime;
+        end: DateTime;
+    };
+    render: () => Render[".md"];
+};
+
+const { render, ...data } = Astro.props;
+const { Content } = await render();
+---
+
+<Event {...data}>
+    <Content />
+</Event>

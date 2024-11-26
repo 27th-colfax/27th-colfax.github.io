@@ -10,23 +10,19 @@ const Tile = ({ active, day, events }: {
     events: {
         slug: string,
         title: string,
-        data: CalendarEvent
+        interval: {
+            start: DateTime,
+            end: DateTime,
+        }
     }[],
 }) => {
     return <div className={active ? 'tile' : 'tile background'}>
         {day}
         {
             events.map((event) => {
-                let queryParams = {
-                    date: event.data.start.toFormat('yyyy-MM-dd')
-                };
+                const date = event.interval.start.toFormat('yyyy-MM-dd')
 
-                // remove undefined and null values
-                const queryString = new URLSearchParams(
-                    Object.fromEntries(Object.entries(queryParams).filter(([_, v]) => v != null))
-                ).toString();
-
-                return <a href={`/event/${event.slug}?${queryString}`} key={`${event.slug}-${event.data.start.toFormat("yyyy-MM-dd")}`}>{event.title}</a>
+                return <a href={`/event/${date}/${event.slug}`} key={`${event.slug}-${event.interval.start.toFormat("yyyy-MM-dd")}`}>{event.title}</a>
             })
         }
     </div>
@@ -96,9 +92,12 @@ const Calendar = ({ events: allEvents }: {
             return {
                 slug: event.slug,
                 title: event.title,
-                data: eventForDate({
-                    date, event: event.data,
-                })
+                interval: eventForDate({
+                    date, originalInterval: {
+                        start: event.data.start,
+                        end: event.data.end
+                    },
+                }),
             }
         })
     })
@@ -124,7 +123,7 @@ const Calendar = ({ events: allEvents }: {
                         const tileDate = monthStart.plus({ days: i - dayOffset })
 
                         const tileEvents = events.filter((event) => (
-                            tileDate <= event.data.start.startOf('day') && tileDate >= event.data.end.startOf('day')
+                            tileDate <= event.interval.start.startOf('day') && tileDate >= event.interval.end.startOf('day')
                         ))
 
                         return <Tile key={i} day={tileDate.day} active={active} events={tileEvents} />

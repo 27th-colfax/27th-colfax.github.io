@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 
 
 const getWeekDay = (weekday: string) => {
@@ -72,12 +72,17 @@ export type RawCalendarEvent = {
 
 export const eventForDate = ({
     date,
-    event: rawEvent,
+    originalInterval: { start: rawStart, end: rawEnd },
 }: {
     date: DateTime
-    event: RawCalendarEvent
-}): CalendarEvent => {
-    const { start: rawStart, end: rawEnd, series: { end: rawSeriesEnd, ...rawSeries } = {}, ...event } = rawEvent
+    originalInterval: {
+        start: string,
+        end: string,
+    }
+}): {
+    start: DateTime,
+    end: DateTime,
+} => {
 
     const start = DateTime.fromISO(rawStart);
     const startDate = start.startOf('day')
@@ -85,19 +90,9 @@ export const eventForDate = ({
 
     const dateOffset = date.diff(startDate)
 
-    const seriesEnd = rawSeriesEnd == null ? undefined : DateTime.fromISO(rawSeriesEnd)
-
-    const series = rawSeries == null ? undefined : {
-        ...rawSeries,
-        end: seriesEnd,
-    } as EventSeries
-
-
     return {
-        ...event,
-        series,
         start: start.plus(dateOffset),
-        end: end.plus(dateOffset),
+        end: end.plus(dateOffset)
     }
 }
 
