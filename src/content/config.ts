@@ -26,25 +26,28 @@ const events = defineCollection({
 		locationWebsite: z.string().optional(),
 		start: z.string(),
 		end: z.string(),
-		frequency: z.object({
-			days: z.number().optional(),
-			weekly: z.object({
-				days: z.array(z.string()).optional(),
-				weeks: z.number().optional(),
-			}).optional(),
-			monthly: z.object({
-				months: z.number().optional(),
-				days: z.array(z.number()).optional(),
-				weekdays: z.array(
-					z.object({
-						weekday: z.string().optional(),
-						week: z.number().optional(),
-					})
-				).optional(),
-			}).optional(),
-			years: z.number().optional()
+		series: z.object({
+			frequency: z.object({
+				days: z.number().optional(),
+				weekly: z.object({
+					days: z.array(z.string()).optional(),
+					weeks: z.number().optional(),
+				}).optional(),
+				monthly: z.object({
+					months: z.number().optional(),
+					days: z.array(z.number()).optional(),
+					weekdays: z.array(
+						z.object({
+							weekday: z.string().optional(),
+							week: z.number().optional(),
+						})
+					).optional(),
+				}).optional(),
+				years: z.number().optional()
+			}),
+			count: z.number().optional(),
+			end: z.string().optional(),
 		}).optional(),
-		count: z.number().optional(),
 	}),
 })
 

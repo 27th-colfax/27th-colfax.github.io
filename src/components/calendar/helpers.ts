@@ -15,9 +15,7 @@ const getWeekDay = (weekday: string) => {
     return 1
 }
 
-export type CalendarEvent = {
-    start: DateTime<true> | DateTime<false>;
-    end: DateTime<true> | DateTime<false>;
+type EventSeries = {
     frequency: {
         days: number | undefined;
         weekly: {
@@ -35,46 +33,69 @@ export type CalendarEvent = {
         years: number | undefined;
     } | undefined;
     count: number | undefined;
+    end: DateTime | undefined,
+}
 
+export type CalendarEvent = {
+    start: DateTime;
+    end: DateTime;
+    series: EventSeries | undefined,
+}
+
+
+type RawEventSeries = {
+    frequency: {
+        days: number | undefined;
+        weekly: {
+            days: string[] | undefined;
+            weeks: number | undefined;
+        } | undefined;
+        monthly: {
+            months: number | undefined;
+            days: number[] | undefined;
+            weekdays: {
+                weekday: string | undefined;
+                week: number | undefined;
+            }[] | undefined;
+        } | undefined;
+        years: number | undefined;
+    } | undefined;
+    count: number | undefined;
+    end: string | undefined,
 }
 
 export type RawCalendarEvent = {
     start: string,
     end: string,
-    frequency: {
-        days: number | undefined,
-        weekly: {
-            days: string[] | undefined,
-            weeks: number | undefined,
-        } | undefined,
-        monthly: {
-            months: number | undefined,
-            days: number[] | undefined,
-            weekdays: {
-                weekday: string | undefined,
-                week: number | undefined,
-            }[] | undefined
-        } | undefined,
-        years: number | undefined,
-    } | undefined,
-    count: number | undefined,
+    series: RawEventSeries | undefined,
 }
 
 export const eventForDate = ({
     date,
-    event,
+    event: rawEvent,
 }: {
     date: DateTime
     event: RawCalendarEvent
-}) => {
-    const start = DateTime.fromISO(event.start);
+}): CalendarEvent => {
+    const { start: rawStart, end: rawEnd, series: { end: rawSeriesEnd, ...rawSeries } = {}, ...event } = rawEvent
+
+    const start = DateTime.fromISO(rawStart);
     const startDate = start.startOf('day')
-    const end = DateTime.fromISO(event.end);
+    const end = DateTime.fromISO(rawEnd);
 
     const dateOffset = date.diff(startDate)
 
+    const seriesEnd = rawSeriesEnd == null ? undefined : DateTime.fromISO(rawSeriesEnd)
+
+    const series = rawSeries == null ? undefined : {
+        ...rawSeries,
+        end: seriesEnd,
+    } as EventSeries
+
+
     return {
         ...event,
+        series,
         start: start.plus(dateOffset),
         end: end.plus(dateOffset),
     }
@@ -93,9 +114,17 @@ export const matchesConfiguration = ({
         return true
     }
 
-    if (event.frequency != null) {
-        const frequency = event.frequency
-        const count = event.count
+    if (event.series?.frequency != null) {
+        const frequency = event.series.frequency
+        const count = event.series.count
+        const rawSeriesEnd = event.series.end
+
+        if (rawSeriesEnd != null) {
+            const seriesEnd = DateTime.fromISO(rawSeriesEnd)
+            if (seriesEnd < date) {
+                return false
+            }
+        }
 
         if (frequency.days != null) {
             const answer = matchesDayConfiguration({
