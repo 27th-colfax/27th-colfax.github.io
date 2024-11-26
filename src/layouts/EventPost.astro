@@ -1,15 +1,17 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import EventDate from "../components/EventDate";
+import type { RawCalendarEvent } from "../components/calendar";
 
-type Props = CollectionEntry<"events">["data"];
+type Props = CollectionEntry<"events">;
 
-const { title, description, location, start, end, frequency, count } =
-    Astro.props;
+const event = Astro.props;
 ---
 
 <html lang="en">
     <head> </head>
     <body>
-        {title}
+        <EventDate client:only="react" event={event as RawCalendarEvent} />
+        {event.data.title}
     </body>
 </html>

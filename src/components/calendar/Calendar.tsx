@@ -14,7 +14,7 @@ const Tile = ({ active, day, events }: {
         {
             events.map((event) => {
                 let queryParams = {
-                    day: event.data.start.toFormat('yyyy-MM-dd')
+                    date: event.data.start.toFormat('yyyy-MM-dd')
                 };
 
                 // remove undefined and null values
