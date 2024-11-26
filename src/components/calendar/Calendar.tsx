@@ -6,7 +6,7 @@ import { eventForDate, matchesConfiguration, type CalendarEvent, type RawCalenda
 
 const Tile = ({ active, day, events }: {
     active: boolean,
-    day: DayNumbers,
+    day: number,
     events: CalendarEvent[],
 }) => {
     return <div className={active ? 'tile' : 'tile background'}>
@@ -48,7 +48,7 @@ const Calendar = ({ events: allEvents }: {
         return queryParamDate;
     }, [rawQueryDate])
 
-    const [targetDate, setTargetDate] = useState(queryDate)
+    const [targetDate, setTargetDate] = useState<DateTime>(queryDate)
 
     useEffect(() => {
         if (!queryDate.equals(targetDate)) {
