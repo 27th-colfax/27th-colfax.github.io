@@ -58,12 +58,15 @@ const Calendar = ({ events: allEvents }: {
         if (!queryDate.equals(targetDate)) {
             const url = new URL(window.location.href);
             url.searchParams.set('date', targetDate.toFormat("yyyy-MM-dd"));
-            window.history.pushState(null, '', url.toString());
+            window.history.replaceState(null, '', url.toString());
         }
     }, [now, targetDate])
 
     useEffect(() => {
         const listener = (keyEvent: KeyboardEvent) => {
+            if (keyEvent.altKey) {
+                return
+            }
             const key = keyEvent.key;
             if (key === 'ArrowRight') {
                 setTargetDate((currentDate) => currentDate.plus({ months: 1 }))
