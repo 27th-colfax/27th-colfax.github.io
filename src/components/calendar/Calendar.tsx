@@ -7,7 +7,11 @@ import { eventForDate, matchesConfiguration, type CalendarEvent, type RawCalenda
 const Tile = ({ active, day, events }: {
     active: boolean,
     day: number,
-    events: CalendarEvent[],
+    events: {
+        slug: string,
+        title: string,
+        data: CalendarEvent
+    }[],
 }) => {
     return <div className={active ? 'tile' : 'tile background'}>
         {day}
@@ -22,14 +26,18 @@ const Tile = ({ active, day, events }: {
                     Object.fromEntries(Object.entries(queryParams).filter(([_, v]) => v != null))
                 ).toString();
 
-                return <a href={`/event/${event.slug}?${queryString}`} key={`${event.slug}-${event.data.start.toFormat("yyyy-MM-dd")}`}>{event.data.title}</a>
+                return <a href={`/event/${event.slug}?${queryString}`} key={`${event.slug}-${event.data.start.toFormat("yyyy-MM-dd")}`}>{event.title}</a>
             })
         }
     </div>
 }
 
 const Calendar = ({ events: allEvents }: {
-    events: RawCalendarEvent[]
+    events: {
+        slug: string,
+        title: string,
+        data: RawCalendarEvent
+    }[]
 }) => {
     const now = DateTime.now()
 
@@ -82,12 +90,16 @@ const Calendar = ({ events: allEvents }: {
         const date = monthStart.plus({ days: i - dayOffset })
         return allEvents.filter((event) => {
             return matchesConfiguration({
-                date, event,
+                date, event: event.data,
             })
         }).map((event) => {
-            return eventForDate({
-                date, event,
-            })
+            return {
+                slug: event.slug,
+                title: event.title,
+                data: eventForDate({
+                    date, event: event.data,
+                })
+            }
         })
     })
 

@@ -8,8 +8,8 @@ const EventDate = ({ event: rawEvent }: {
     const rawDate = urlParams.get('date') ?? '';
     const date = DateTime.fromFormat(rawDate, 'yyyy-MM-dd')
     const event = eventForDate({ date, event: rawEvent })
-    const start = event.data.start
-    const end = event.data.end
+    const start = event.start
+    const end = event.end
 
     return <div>
         {start.toLocaleString(DateTime.DATE_FULL)} - {end.toLocaleString(DateTime.DATE_FULL)}

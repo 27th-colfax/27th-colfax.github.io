@@ -18,7 +18,12 @@ const events = defineCollection({
 	schema: z.object({
 		title: z.string(),
 		description: z.string(),
-		location: z.string(),
+		headerImage: z.string().optional(),
+		locationAddress: z.string().optional(),
+		locationName: z.string().optional(),
+		locationMap: z.string().optional(),
+		locationLink: z.string().optional(),
+		locationWebsite: z.string().optional(),
 		start: z.string(),
 		end: z.string(),
 		frequency: z.object({

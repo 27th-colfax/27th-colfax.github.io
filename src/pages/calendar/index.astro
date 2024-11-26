@@ -18,7 +18,14 @@ const events = await getCollection("events");
         <Header />
         <main>
             Page under construction 🔨
-            <Calendar client:only="react" events={events as RawCalendarEvent[]} />
+            <Calendar
+                client:only="react"
+                events={events.map((event) => ({
+                    slug: event.slug,
+                    title: event.data.title,
+                    data: event.data as RawCalendarEvent
+                }))}
+            />
         </main>
         <Footer />
     </body>

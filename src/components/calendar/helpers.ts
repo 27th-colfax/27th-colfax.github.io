@@ -16,66 +16,48 @@ const getWeekDay = (weekday: string) => {
 }
 
 export type CalendarEvent = {
-    data: {
-        start: DateTime<true> | DateTime<false>;
-        end: DateTime<true> | DateTime<false>;
-        title: string;
-        description: string;
-        location: string;
-        frequency: {
-            days: number | undefined;
-            weekly: {
-                days: string[] | undefined;
-                weeks: number | undefined;
-            } | undefined;
-            monthly: {
-                months: number | undefined;
-                days: number[] | undefined;
-                weekdays: {
-                    weekday: string | undefined;
-                    week: number | undefined;
-                }[] | undefined;
-            } | undefined;
-            years: number | undefined;
+    start: DateTime<true> | DateTime<false>;
+    end: DateTime<true> | DateTime<false>;
+    frequency: {
+        days: number | undefined;
+        weekly: {
+            days: string[] | undefined;
+            weeks: number | undefined;
         } | undefined;
-        count: number | undefined;
-    };
-    id: string;
-    slug: string;
-    body: string;
-    collection: string;
+        monthly: {
+            months: number | undefined;
+            days: number[] | undefined;
+            weekdays: {
+                weekday: string | undefined;
+                week: number | undefined;
+            }[] | undefined;
+        } | undefined;
+        years: number | undefined;
+    } | undefined;
+    count: number | undefined;
 
 }
 
 export type RawCalendarEvent = {
-    id: string,
-    slug: string,
-    body: string,
-    collection: string,
-    data: {
-        title: string,
-        description: string,
-        location: string,
-        start: string,
-        end: string,
-        frequency: {
-            days: number | undefined,
-            weekly: {
-                days: string[] | undefined,
-                weeks: number | undefined,
-            } | undefined,
-            monthly: {
-                months: number | undefined,
-                days: number[] | undefined,
-                weekdays: {
-                    weekday: string | undefined,
-                    week: number | undefined,
-                }[] | undefined
-            } | undefined,
-            years: number | undefined,
+    start: string,
+    end: string,
+    frequency: {
+        days: number | undefined,
+        weekly: {
+            days: string[] | undefined,
+            weeks: number | undefined,
         } | undefined,
-        count: number | undefined,
-    }
+        monthly: {
+            months: number | undefined,
+            days: number[] | undefined,
+            weekdays: {
+                weekday: string | undefined,
+                week: number | undefined,
+            }[] | undefined
+        } | undefined,
+        years: number | undefined,
+    } | undefined,
+    count: number | undefined,
 }
 
 export const eventForDate = ({
@@ -85,19 +67,16 @@ export const eventForDate = ({
     date: DateTime
     event: RawCalendarEvent
 }) => {
-    const start = DateTime.fromISO(event.data.start);
+    const start = DateTime.fromISO(event.start);
     const startDate = start.startOf('day')
-    const end = DateTime.fromISO(event.data.end);
+    const end = DateTime.fromISO(event.end);
 
     const dateOffset = date.diff(startDate)
 
     return {
         ...event,
-        data: {
-            ...event.data,
-            start: start.plus(dateOffset),
-            end: end.plus(dateOffset),
-        }
+        start: start.plus(dateOffset),
+        end: end.plus(dateOffset),
     }
 }
 
@@ -108,15 +87,15 @@ export const matchesConfiguration = ({
     date: DateTime
     event: RawCalendarEvent
 }) => {
-    const startDate = DateTime.fromISO(event.data.start).startOf('day');
+    const startDate = DateTime.fromISO(event.start).startOf('day');
 
     if (date.equals(startDate)) {
         return true
     }
 
-    if (event.data.frequency != null) {
-        const frequency = event.data.frequency
-        const count = event.data.count
+    if (event.frequency != null) {
+        const frequency = event.frequency
+        const count = event.count
 
         if (frequency.days != null) {
             const answer = matchesDayConfiguration({
@@ -254,7 +233,7 @@ const matchesMonthWeekdayConfiguration = ({
         weekday: string | undefined,
         week: number | undefined,
     }[],
-    monthsInterval: number |undefined,
+    monthsInterval: number | undefined,
     count: number | undefined,
 }) => {
     const monthsInterval = rawMonthsInterval ?? 1
