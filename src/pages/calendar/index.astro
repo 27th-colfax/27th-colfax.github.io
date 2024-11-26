@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import BaseHead from "../../components/BaseHead.astro";
 import Footer from "../../components/Footer.astro";
 import Header from "../../components/Header.astro";
-import Calendar from "../../components/calendar";
+import Calendar, { type RawCalendarEvent } from "../../components/calendar";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 
 const events = await getCollection("events");
@@ -18,7 +18,7 @@ const events = await getCollection("events");
         <Header />
         <main>
             Page under construction 🔨
-            <Calendar client:only events={events}/>
+            <Calendar client:only="react" events={events as RawCalendarEvent[]} />
         </main>
         <Footer />
     </body>
