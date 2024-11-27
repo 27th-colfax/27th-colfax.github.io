@@ -1,19 +1,30 @@
 ---
-import type { RawCalendarEvent } from "../components/calendar";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
 import { DateTime } from "luxon";
 
+import OpenInNewIcon from "../assets/icons/external-link.astro";
+
 type Props = {
     title: string;
     description: string;
     headerImage: string;
-    locationAddress: string;
-    locationName: string;
-    locationMap: string;
-    locationLink: string;
-    locationWebsite: string;
+    place:
+        | {
+              name: string | undefined;
+              address: string | undefined;
+              website: string | undefined;
+              location:
+                  | {
+                        latitude: number;
+                        longitude: number;
+                    }
+                  | undefined;
+              phone: string | undefined;
+              map: string | undefined;
+          }
+        | undefined;
     canceled: boolean;
     missed: boolean;
     interval: {
@@ -26,11 +37,7 @@ const {
     title,
     description,
     headerImage,
-    locationAddress,
-    locationName,
-    locationMap,
-    locationLink,
-    locationWebsite,
+    place,
     canceled,
     missed,
     interval: { start, end },
@@ -103,25 +110,60 @@ const {
                                 {start.toLocaleString(DateTime.DATETIME_MED)} -
                                 {end.toLocaleString(DateTime.DATETIME_MED)}
                             </div>
-                            <!-- TODO: make a location component that looks nice no matter the inputs -->
-                            <div class="location">
-                                {
-                                    locationName && (
-                                        <div class="name">{locationName}</div>
-                                    )
-                                }
-                                {
-                                    locationMap ? (
-                                        <a class="address" href={locationMap}>
-                                            {locationAddress}
-                                        </a>
-                                    ) : (
-                                        <div class="address">
-                                            {locationAddress}
-                                        </div>
-                                    )
-                                }
-                            </div>
+                            {
+                                place != null && (
+                                    <div class="location">
+                                        {place.name && (
+                                            <div class="name">
+                                                {place.name}
+                                                {place.website != null && (
+                                                    <a href={place.website}>
+                                                        <OpenInNewIcon  />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+                                        {(place.address || place.map) && (
+                                            <div class="directions">
+                                                {place.address != null && (
+                                                    <div>{place.address}</div>
+                                                )}
+                                                {place.address == null && (
+                                                    <div>Directions</div>
+                                                )}
+                                                {place.map != null && (
+                                                    <a href={place.map}>
+                                                        <OpenInNewIcon  />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+                                        {place.location && (
+                                            <div class="location">
+                                                <div>
+                                                    {place.location.latitude}{" "}
+                                                    {place.location.latitude}
+                                                </div>
+                                                {place.map != null && (
+                                                    <a
+                                                        href={`geo:${place.location.latitude},${place.location.latitude}`}
+                                                    >
+                                                        <OpenInNewIcon  />
+                                                    </a>
+                                                )}
+                                            </div>
+                                        )}
+                                        {place.phone && (
+                                            <div class="phone">
+                                                {place.phone}
+                                                <a href={`tel:${place.phone}`}>
+                                                    <OpenInNewIcon  />
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            }
                             <h1>{title}</h1>
                             <hr />
                         </div>

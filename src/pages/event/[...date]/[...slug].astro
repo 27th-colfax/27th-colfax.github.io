@@ -71,11 +71,21 @@ type Props = {
     title: string;
     description: string;
     headerImage: string;
-    locationAddress: string;
-    locationName: string;
-    locationMap: string;
-    locationLink: string;
-    locationWebsite: string;
+    place:
+        | {
+              name: string | undefined;
+              address: string | undefined;
+              website: string | undefined;
+              location:
+                  | {
+                        latitude: number;
+                        longitude: number;
+                    }
+                  | undefined;
+              phone: string | undefined;
+              map: string | undefined;
+          }
+        | undefined;
     canceled: boolean;
     missed: boolean;
     interval: {

@@ -19,11 +19,17 @@ const events = defineCollection({
 		title: z.string(),
 		description: z.string(),
 		headerImage: z.string().optional(),
-		locationAddress: z.string().optional(),
-		locationName: z.string().optional(),
-		locationMap: z.string().optional(),
-		locationLink: z.string().optional(),
-		locationWebsite: z.string().optional(),
+		place: z.object({
+			name: z.string().optional(),
+			address: z.string().optional(),
+			website: z.string().optional(),
+			location: z.object({
+				latitude: z.number(),
+				longitude: z.number(),
+			}).optional(),
+			phone: z.string().optional(),
+			map: z.string().optional(),
+		}).optional(),
 		start: z.string(),
 		end: z.string(),
 		series: z.object({
