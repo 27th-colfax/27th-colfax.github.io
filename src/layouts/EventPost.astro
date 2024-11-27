@@ -67,7 +67,7 @@ calendar.createEvent({
     url: place?.website,
 });
 
-const calendarString = btoa(calendar.toString());
+const calendarString = calendar.toString();
 ---
 
 <html lang="en">
@@ -222,8 +222,7 @@ const calendarString = btoa(calendar.toString());
                             )
                         }
                         <a
-                            href={"data:text/calendar;base64," +
-                                encodeURI(calendarString)}
+                            id="calendarDownload"
                             download={date + "-" + slug + ".ics"}
                             target="_blank"
                             >Add to calendar
@@ -268,3 +267,8 @@ const calendarString = btoa(calendar.toString());
         justify-content: center;
     }
 </style>
+<script defer define:vars={{ calendarString }}>
+    const blob = new Blob([calendarString], { type: "text/calendar" });
+    var fileURL = URL.createObjectURL(blob);
+    calendarDownload.href = fileURL;
+</script>
