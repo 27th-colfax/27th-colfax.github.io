@@ -225,6 +225,7 @@ const calendarString = btoa(calendar.toString());
                             href={"data:text/calendar;base64," +
                                 encodeURI(calendarString)}
                             download={date + "-" + slug + ".ics"}
+                            target="_blank"
                             >Add to calendar
                             <OpenInNewIcon />
                         </a>
