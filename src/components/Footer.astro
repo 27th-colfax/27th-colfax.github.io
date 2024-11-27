@@ -9,8 +9,16 @@ const today = new Date();
 ---
 
 <footer>
-	&copy; {today.getFullYear()} Leyla Becker. <div aria-label="CC BY-NC-SA">
-		<CC /><BY /><NC /><SA />
+	<div class="copyright">
+		&copy; {today.getFullYear()} Leyla Becker. <div
+			class="releases"
+			aria-label="CC BY-NC-SA"
+		>
+			<span><CC /></span>
+			<span><BY /></span>
+			<span><NC /></span>
+			<span><SA /></span>
+		</div>
 	</div>
 	<div class="social-links">
 		<a
@@ -28,6 +36,20 @@ const today = new Date();
 		background: linear-gradient(var(--gray-gradient)) no-repeat;
 		color: rgb(var(--gray));
 		text-align: center;
+	}
+	.copyright {
+		display: flex;
+		justify-content: center;
+	}
+	.copyright .releases {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin-left: 5px;
+	}
+	.copyright .releases span {
+		display: flex;
+		margin: 2.5px;
 	}
 	.social-links {
 		display: flex;
