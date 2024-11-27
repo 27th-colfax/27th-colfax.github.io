@@ -67,7 +67,7 @@ calendar.createEvent({
     url: place?.website,
 });
 
-const calendarString = calendar.toString();
+const calendarString = btoa(calendar.toString());
 ---
 
 <html lang="en">
@@ -222,7 +222,7 @@ const calendarString = calendar.toString();
                             )
                         }
                         <a
-                            href={"data:text/plain," +
+                            href={"data:text/calendar;base64," +
                                 encodeURI(calendarString)}
                             download={date + "-" + slug + ".ics"}
                             >Add to calendar
