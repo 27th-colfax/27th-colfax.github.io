@@ -110,89 +110,87 @@ const {
                                 {start.toLocaleString(DateTime.DATETIME_MED)} -
                                 {end.toLocaleString(DateTime.DATETIME_MED)}
                             </div>
-                            {
-                                place != null && (
-                                    <div class="location">
-                                        {(place.name || place.website) && (
-                                            <div class="name">
-                                                {place.name != null && (
-                                                    <>
-                                                        <div>{place.name}</div>
-                                                        {place.website !=
-                                                            null && (
-                                                            <a
-                                                                href={
-                                                                    place.website
-                                                                }
-                                                                aria-label="website link"
-                                                            >
-                                                                <OpenInNewIcon />
-                                                            </a>
-                                                        )}
-                                                    </>
-                                                )}
-                                                {place.name == null && (
-                                                    <a
-                                                        href={place.website}
-                                                        aria-label="website link"
-                                                    >
-                                                        Website
-                                                        <OpenInNewIcon />
-                                                    </a>
-                                                )}
-                                            </div>
-                                        )}
-                                        {(place.address || place.map) && (
-                                            <div class="directions">
-                                                {place.address != null && (
-                                                    <div>{place.address}</div>
-                                                )}
-                                                {place.address == null && (
-                                                    <div>Directions</div>
-                                                )}
-                                                {place.map != null && (
-                                                    <a
-                                                        href={place.map}
-                                                        aria-label="map link"
-                                                    >
-                                                        <OpenInNewIcon />
-                                                    </a>
-                                                )}
-                                            </div>
-                                        )}
-                                        {place.location && (
-                                            <div class="location">
-                                                <div>
-                                                    {place.location.latitude}{" "}
-                                                    {place.location.latitude}
-                                                </div>
-                                                {place.map != null && (
-                                                    <a
-                                                        href={`geo:${place.location.latitude},${place.location.latitude}`}
-                                                        aria-label="coordinate link"
-                                                    >
-                                                        <OpenInNewIcon />
-                                                    </a>
-                                                )}
-                                            </div>
-                                        )}
-                                        {place.phone && (
-                                            <div class="phone">
-                                                {place.phone}
+                            {(canceled || missed) &&<div>canceled</div>}
+                        </div>
+                        {
+                            place != null && (
+                                <div class="place">
+                                    {(place.name || place.website) && (
+                                        <div class="name">
+                                            {place.name != null && (
+                                                <>
+                                                    <div>{place.name}</div>
+                                                    {place.website != null && (
+                                                        <a
+                                                            href={place.website}
+                                                            aria-label="website link"
+                                                        >
+                                                            <OpenInNewIcon />
+                                                        </a>
+                                                    )}
+                                                </>
+                                            )}
+                                            {place.name == null && (
                                                 <a
-                                                    href={`tel:${place.phone}`}
-                                                    aria-label="phone link"
+                                                    href={place.website}
+                                                    aria-label="website link"
+                                                >
+                                                    Website
+                                                    <OpenInNewIcon />
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                    {(place.address || place.map) && (
+                                        <div class="directions">
+                                            {place.address != null && (
+                                                <div>{place.address}</div>
+                                            )}
+                                            {place.address == null && (
+                                                <div>Directions</div>
+                                            )}
+                                            {place.map != null && (
+                                                <a
+                                                    href={place.map}
+                                                    aria-label="map link"
                                                 >
                                                     <OpenInNewIcon />
                                                 </a>
+                                            )}
+                                        </div>
+                                    )}
+                                    {place.location && (
+                                        <div class="location">
+                                            <div>
+                                                {place.location.latitude}{" "}
+                                                {place.location.latitude}
                                             </div>
-                                        )}
-                                    </div>
-                                )
-                            }
-                            <h1>{title}</h1>
-                            <hr />
-                        </div>
+                                            {place.map != null && (
+                                                <a
+                                                    href={`geo:${place.location.latitude},${place.location.latitude}`}
+                                                    aria-label="coordinate link"
+                                                >
+                                                    <OpenInNewIcon />
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                    {place.phone && (
+                                        <div class="phone">
+                                            {place.phone}
+                                            <a
+                                                href={`tel:${place.phone}`}
+                                                aria-label="phone link"
+                                            >
+                                                <OpenInNewIcon />
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                            )
+                        }
+                        <h1>{title}</h1>
+                        <hr />
                         <slot />
                     </div>
                 </div>
@@ -201,3 +199,29 @@ const {
         </main>
     </body>
 </html>
+<style>
+    .place {
+        display: flex;
+        flex-direction: column;
+    }
+    .place .name {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .place .directions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .place .location {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .place .phone {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
