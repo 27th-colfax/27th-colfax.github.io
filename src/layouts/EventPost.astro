@@ -113,12 +113,31 @@ const {
                             {
                                 place != null && (
                                     <div class="location">
-                                        {place.name && (
+                                        {(place.name || place.website) && (
                                             <div class="name">
-                                                {place.name}
-                                                {place.website != null && (
-                                                    <a href={place.website}>
-                                                        <OpenInNewIcon  />
+                                                {place.name != null && (
+                                                    <>
+                                                        <div>{place.name}</div>
+                                                        {place.website !=
+                                                            null && (
+                                                            <a
+                                                                href={
+                                                                    place.website
+                                                                }
+                                                                aria-label="website link"
+                                                            >
+                                                                <OpenInNewIcon />
+                                                            </a>
+                                                        )}
+                                                    </>
+                                                )}
+                                                {place.name == null && (
+                                                    <a
+                                                        href={place.website}
+                                                        aria-label="website link"
+                                                    >
+                                                        Website
+                                                        <OpenInNewIcon />
                                                     </a>
                                                 )}
                                             </div>
@@ -132,8 +151,11 @@ const {
                                                     <div>Directions</div>
                                                 )}
                                                 {place.map != null && (
-                                                    <a href={place.map}>
-                                                        <OpenInNewIcon  />
+                                                    <a
+                                                        href={place.map}
+                                                        aria-label="map link"
+                                                    >
+                                                        <OpenInNewIcon />
                                                     </a>
                                                 )}
                                             </div>
@@ -147,8 +169,9 @@ const {
                                                 {place.map != null && (
                                                     <a
                                                         href={`geo:${place.location.latitude},${place.location.latitude}`}
+                                                        aria-label="coordinate link"
                                                     >
-                                                        <OpenInNewIcon  />
+                                                        <OpenInNewIcon />
                                                     </a>
                                                 )}
                                             </div>
@@ -156,8 +179,11 @@ const {
                                         {place.phone && (
                                             <div class="phone">
                                                 {place.phone}
-                                                <a href={`tel:${place.phone}`}>
-                                                    <OpenInNewIcon  />
+                                                <a
+                                                    href={`tel:${place.phone}`}
+                                                    aria-label="phone link"
+                                                >
+                                                    <OpenInNewIcon />
                                                 </a>
                                             </div>
                                         )}
