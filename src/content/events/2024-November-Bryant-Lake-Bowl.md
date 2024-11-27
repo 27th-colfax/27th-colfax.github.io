@@ -14,4 +14,4 @@ start: '2024-11-08T18:00:00'
 end: '2024-11-08T22:00:00'
 ---
 
-something here:
+Come Join the Neighborhood for a night of hanging out and bowling. Pay your own food and bowling tab.
