@@ -3,7 +3,6 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
 import { DateTime } from "luxon";
-import ical, { ICalCalendarMethod } from "ical-generator";
 
 import OpenInNewIcon from "../assets/icons/external-link.astro";
 
@@ -47,27 +46,6 @@ const {
     missed,
     interval: { start, end },
 } = Astro.props;
-
-const calendar = ical({ name: title });
-
-// A method is required for outlook to display event as an invitation
-calendar.method(ICalCalendarMethod.REQUEST);
-
-calendar.createEvent({
-    start: start.toJSDate(),
-    end: end.toJSDate(),
-    summary: title,
-    description: description,
-    location:
-        place?.address ??
-        place?.map ??
-        (place?.location == null
-            ? null
-            : `geo:${place?.location?.latitude},${place?.location?.latitude}`),
-    url: place?.website,
-});
-
-const calendarString = calendar.toString();
 ---
 
 <html lang="en">
@@ -223,6 +201,7 @@ const calendarString = calendar.toString();
                         }
                         <a
                             id="calendarDownload"
+                            href={`/event/${date}/${slug}.ics`}
                             download={date + "-" + slug + ".ics"}
                             target="_blank"
                             >Add to calendar
@@ -267,8 +246,3 @@ const calendarString = calendar.toString();
         justify-content: center;
     }
 </style>
-<script defer define:vars={{ calendarString }}>
-    const blob = new Blob([calendarString], { type: "text/calendar" });
-    var fileURL = URL.createObjectURL(blob);
-    calendarDownload.href = fileURL;
-</script>
