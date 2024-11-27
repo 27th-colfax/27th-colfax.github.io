@@ -110,7 +110,7 @@ const {
                                 {start.toLocaleString(DateTime.DATETIME_MED)} -
                                 {end.toLocaleString(DateTime.DATETIME_MED)}
                             </div>
-                            {(canceled || missed) &&<div>canceled</div>}
+                            {(canceled || missed) && <div>canceled</div>}
                         </div>
                         {
                             place != null && (
@@ -160,7 +160,13 @@ const {
                                         </div>
                                     )}
                                     {place.location && (
-                                        <div class="location">
+                                        <div
+                                            class={
+                                                place.address || place.map
+                                                    ? "location secondary"
+                                                    : "location"
+                                            }
+                                        >
                                             <div>
                                                 {place.location.latitude}{" "}
                                                 {place.location.latitude}
@@ -176,7 +182,7 @@ const {
                                         </div>
                                     )}
                                     {place.phone && (
-                                        <div class="phone">
+                                        <div class="phone secondary">
                                             {place.phone}
                                             <a
                                                 href={`tel:${place.phone}`}
@@ -218,6 +224,9 @@ const {
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    .secondary {
+        color: grey
     }
     .place .phone {
         display: flex;
