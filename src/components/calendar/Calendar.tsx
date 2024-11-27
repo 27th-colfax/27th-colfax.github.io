@@ -28,17 +28,54 @@ const Tile = ({ active, day, events }: {
     </div>
 }
 
-const findNextEvent = (events: RawCalendarEvent[]) => {
-    const now = DateTime.now().startOf('day')
-    const nextMonthEnd = now.plus({ months: 1 }).endOf('month')
-    const searchDays = nextMonthEnd.diff(now, ['days']).days
-    return (Array.from({ length: searchDays }, (_, i) => now.plus({ days: i })).find((searchDay) => {
-        return events.some((event) => (
-            matchesConfiguration({
-                date: searchDay, event: event,
+const useInitialMonth = (events: RawCalendarEvent[]) => {
+    return useMemo(() => {
+        const now = DateTime.now().startOf('day')
+        const nextMonthEnd = now.plus({ months: 1 }).endOf('month')
+        const searchDays = nextMonthEnd.diff(now, ['days']).days
+        return (Array.from({ length: searchDays }, (_, i) => now.plus({ days: i })).find((searchDay) => {
+            return events.some((event) => (
+                matchesConfiguration({
+                    date: searchDay, event: event,
+                })
+            ))
+        }) ?? now).startOf('month')
+    }, [])
+}
+
+const useEvents = ({ weeks, monthStart, dayOffset, events}: {
+    weeks: number;
+    monthStart: DateTime;
+    dayOffset: number;
+    events: {
+        slug: string;
+        title: string;
+        data: RawCalendarEvent;
+    }[]
+}) => {
+    return useMemo(() => {
+        return Array.from({ length: weeks * 7 }).flatMap((_, i) => {
+            const date = monthStart.plus({ days: i - dayOffset })
+            return events.filter((event) => {
+                return matchesConfiguration({
+                    date, event: event.data,
+                })
+                    && !eventMissed({ date, missedDates: event.data.series?.missedDates })
+                    && !eventCanceled({ date, canceledDates: event.data.series?.canceledDates })
+            }).map((event) => {
+                return {
+                    slug: event.slug,
+                    title: event.title,
+                    interval: eventForDate({
+                        date, originalInterval: {
+                            start: event.data.start,
+                            end: event.data.end
+                        },
+                    }),
+                }
             })
-        ))
-    }) ?? now).startOf('month')
+        })
+    }, [weeks, monthStart, dayOffset, events])
 }
 
 
@@ -49,9 +86,7 @@ const Calendar = ({ events: allEvents }: {
         data: RawCalendarEvent
     }[]
 }) => {
-    const now = DateTime.now()
-
-    const initialMonth = findNextEvent(allEvents.map((event) => event.data))
+    const initialMonth = useInitialMonth(allEvents.map((event) => event.data))
 
     const urlParams = new URLSearchParams(window.location.search);
     const rawQueryDate = urlParams.get('date');
@@ -106,28 +141,13 @@ const Calendar = ({ events: allEvents }: {
     const daysInMonth = monthEnd.day;
     const weeks = Math.ceil((monthEnd.day + dayOffset) / 7);
 
-    const events = Array.from({ length: weeks * 7 }).flatMap((_, i) => {
-        const date = monthStart.plus({ days: i - dayOffset })
-        return allEvents.filter((event) => {
-            return matchesConfiguration({
-                date, event: event.data,
-            })
-                && !eventMissed({ date, missedDates: event.data.series?.missedDates })
-                && !eventCanceled({ date, canceledDates: event.data.series?.canceledDates })
-        }).map((event) => {
-            return {
-                slug: event.slug,
-                title: event.title,
-                interval: eventForDate({
-                    date, originalInterval: {
-                        start: event.data.start,
-                        end: event.data.end
-                    },
-                }),
-            }
-        })
+    const events = useEvents({
+        weeks,
+        monthStart,
+        dayOffset,
+        events: allEvents,
     })
-
+    
     return (
         <div>
             <div className="calendar-date-selector">
