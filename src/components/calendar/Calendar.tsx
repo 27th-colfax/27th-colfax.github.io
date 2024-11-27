@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 
 import './Calendar.css';
 import { useEffect, useMemo, useState } from "react";
-import { eventCanceled, eventForDate, eventMissed, matchesConfiguration, type CalendarEvent, type RawCalendarEvent } from "./helpers";
+import { eventCanceled, eventForDate, eventMissed, matchesConfiguration, type RawCalendarEvent } from "./helpers";
 
 const Tile = ({ active, day, events }: {
     active: boolean,
@@ -28,6 +28,20 @@ const Tile = ({ active, day, events }: {
     </div>
 }
 
+const findNextEvent = (events: RawCalendarEvent[]) => {
+    const now = DateTime.now().startOf('day')
+    const nextMonthEnd = now.plus({ months: 1 }).endOf('month')
+    const searchDays = nextMonthEnd.diff(now, ['days']).days
+    return (Array.from({ length: searchDays }, (_, i) => now.plus({ days: i })).find((searchDay) => {
+        return events.some((event) => (
+            matchesConfiguration({
+                date: searchDay, event: event,
+            })
+        ))
+    }) ?? now).startOf('month')
+}
+
+
 const Calendar = ({ events: allEvents }: {
     events: {
         slug: string,
@@ -37,16 +51,18 @@ const Calendar = ({ events: allEvents }: {
 }) => {
     const now = DateTime.now()
 
+    const initialMonth = findNextEvent(allEvents.map((event) => event.data))
+
     const urlParams = new URLSearchParams(window.location.search);
     const rawQueryDate = urlParams.get('date');
     const queryDate = useMemo(() => {
         if (rawQueryDate == null) {
-            return now
+            return initialMonth
         }
 
         const queryParamDate = DateTime.fromFormat(rawQueryDate, "yyyy-MM-dd")
         if (!queryParamDate.isValid) {
-            return now
+            return initialMonth
         }
 
         return queryParamDate;
@@ -57,10 +73,15 @@ const Calendar = ({ events: allEvents }: {
     useEffect(() => {
         if (!queryDate.equals(targetDate)) {
             const url = new URL(window.location.href);
-            url.searchParams.set('date', targetDate.toFormat("yyyy-MM-dd"));
+            if (targetDate.equals(initialMonth)) {
+                url.searchParams.delete('date');
+            } else {
+                url.searchParams.set('date', targetDate.toFormat("yyyy-MM-dd"));
+
+            }
             window.history.replaceState(null, '', url.toString());
         }
-    }, [now, targetDate])
+    }, [queryDate, targetDate])
 
     useEffect(() => {
         const listener = (keyEvent: KeyboardEvent) => {
