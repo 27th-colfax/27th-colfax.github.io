@@ -3,10 +3,14 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
 import { DateTime } from "luxon";
+import ical, { ICalCalendarMethod } from "ical-generator";
 
 import OpenInNewIcon from "../assets/icons/external-link.astro";
+import { undefined } from "astro:schema";
 
 type Props = {
+    slug: string;
+    date: string;
     title: string;
     description: string;
     headerImage: string;
@@ -34,6 +38,8 @@ type Props = {
 };
 
 const {
+    slug,
+    date,
     title,
     description,
     headerImage,
@@ -42,6 +48,27 @@ const {
     missed,
     interval: { start, end },
 } = Astro.props;
+
+const calendar = ical({ name: title });
+
+// A method is required for outlook to display event as an invitation
+calendar.method(ICalCalendarMethod.REQUEST);
+
+calendar.createEvent({
+    start: start.toJSDate(),
+    end: end.toJSDate(),
+    summary: title,
+    description: description,
+    location:
+        place?.address ??
+        place?.map ??
+        (place?.location == null
+            ? null
+            : `geo:${place?.location?.latitude},${place?.location?.latitude}`),
+    url: place?.website,
+});
+
+const calendarString = calendar.toString();
 ---
 
 <html lang="en">
@@ -195,6 +222,13 @@ const {
                                 </div>
                             )
                         }
+                        <a
+                            href={"data:text/plain," +
+                                encodeURI(calendarString)}
+                            download={date + "-" + slug + ".ics"}
+                            >Add to calendar
+                            <OpenInNewIcon />
+                        </a>
                         <h1>{title}</h1>
                         <hr />
                         <slot />
@@ -226,7 +260,7 @@ const {
         justify-content: center;
     }
     .secondary {
-        color: grey
+        color: grey;
     }
     .place .phone {
         display: flex;

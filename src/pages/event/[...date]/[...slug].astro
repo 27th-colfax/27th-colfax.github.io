@@ -54,9 +54,11 @@ export async function getStaticPaths() {
                 });
 
                 return {
-                    params: { slug: slug, date: formattedDate },
+                    params: { slug, date: formattedDate },
                     props: {
                         ...data,
+                        slug,
+                        date: formattedDate,
                         interval,
                         canceled,
                         missed,
@@ -68,6 +70,8 @@ export async function getStaticPaths() {
 }
 
 type Props = {
+    slug: string;
+    date: string;
     title: string;
     description: string;
     headerImage: string;
