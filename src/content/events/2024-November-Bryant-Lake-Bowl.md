@@ -1,6 +1,7 @@
 ---
 title: 'Bryant-Lake Bowling!'
-description: ''
+description: 'Bowling food and fun with the neighborhood at Bryant Lake Bowl'
+headerImage: /stock/BryantLakeBowl.jpg
 place:
     name: Bryant Lake Bowl
     address: '810 W Lake St, Minneapolis, MN 55408'
@@ -15,3 +16,9 @@ end: '2024-11-08T22:00:00'
 ---
 
 Come Join the Neighborhood for a night of hanging out and bowling. Pay your own food and bowling tab.
+
+After event photos:
+
+![group photo](/photos/2024-November-Bryant-Lake-Bowl/group_photo.jpeg)
+![bowling going for a strike](/photos/2024-November-Bryant-Lake-Bowl/bowling_lane.jpeg)
+![people chatting](/photos/2024-November-Bryant-Lake-Bowl/chatting.jpeg)
