@@ -1,3 +1,4 @@
+import { getCollection } from "astro:content";
 import { DateTime } from "luxon";
 
 
@@ -386,4 +387,62 @@ const matchesYearConfiguration = ({
     if (date.equals(offsetStartDate)) {
         return true
     }
+}
+
+export const getAllEvents = async () => {
+    const events = await getCollection("events");
+
+    const oldestEventDate = events
+        .map((event) => DateTime.fromISO(event.data.start))
+        .reduce((a, b) => (a < b ? a : b));
+    const startDate = oldestEventDate.startOf("month").startOf("day");
+    const endDate = DateTime.now()
+        .plus({ years: 1 })
+        .startOf("day")
+        .endOf("year");
+
+    const days = Math.ceil(endDate.diff(startDate, ["day"]).days);
+
+    return Array.from({ length: days }).flatMap((_, i) => {
+        const date = startDate.plus({ days: i });
+        const formattedDate = date.toFormat("yyyy-MM-dd");
+        return events
+            .filter((event) => {
+                return matchesConfiguration({
+                    date,
+                    event: event.data as RawCalendarEvent,
+                });
+            })
+            .map((rawEvent) => {
+                const { slug, data: rawData, render } = rawEvent;
+                const { start, end, series, ...data } = rawData;
+
+                const interval = eventForDate({
+                    date,
+                    originalInterval: { start, end },
+                });
+
+                const canceled = eventCanceled({
+                    date,
+                    canceledDates: series?.canceledDates,
+                });
+                const missed = eventMissed({
+                    date,
+                    missedDates: series?.missedDates,
+                });
+
+                return {
+                    params: { slug, date: formattedDate },
+                    props: {
+                        ...data,
+                        slug,
+                        date: formattedDate,
+                        interval,
+                        canceled,
+                        missed,
+                        render,
+                    },
+                };
+            });
+    });
 }
