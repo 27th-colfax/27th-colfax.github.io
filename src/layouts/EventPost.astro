@@ -199,17 +199,32 @@ const {
                                 </div>
                             )
                         }
-                        <a
-                            id="calendarDownload"
-                            href={`/event/${date}/${slug}.ics`}
-                            download={date + "-" + slug + ".ics"}
-                            target="_blank"
-                            >Add to calendar
-                            <OpenInNewIcon />
-                        </a>
+                        <div>
+                            <a
+                                id="calendarDownload"
+                                href={`/event/${date}/${slug}.ics`}
+                                download={date + "-" + slug + ".ics"}
+                                target="_blank"
+                                >Add to calendar
+                                <OpenInNewIcon />
+                            </a>
+                        </div>
                         <h1>{title}</h1>
                         <hr />
                         <slot />
+                        <hr />
+                        <div>
+                            Subscribe to RSS feed
+                            <a href="/rss.xml">
+                                <img
+                                    width="30"
+                                    height="30"
+                                    alt="rss link icon"
+                                    src="/icons/rss.webp"
+                                    alt="Subscribe to My Website"
+                                /></a
+                            >
+                        </div>
                     </div>
                 </div>
             </article>
