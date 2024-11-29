@@ -22,7 +22,7 @@ const Tile = ({ active, day, events }: {
             events.map((event) => {
                 const date = event.interval.start.toFormat('yyyy-MM-dd')
 
-                return <a href={`/event/${date}/${event.slug}`} key={`${event.slug}-${event.interval.start.toFormat("yyyy-MM-dd")}`}>{event.title}</a>
+                return <a href={`/events/${date}/${event.slug}`} key={`${event.slug}-${event.interval.start.toFormat("yyyy-MM-dd")}`}>{event.title}</a>
             })
         }
     </div>
