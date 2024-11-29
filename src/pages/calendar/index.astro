@@ -21,7 +21,7 @@ const events = await getCollection("events");
             <div>
                 <a
                     id="calendarDownload"
-                    href={`/events.ics`}
+                    href={`webcal://${Astro.url.host}/events.ics`}
                     download={"27th-colfax-calendar.ics"}
                     target="_blank"
                     >Add to your calendar:
