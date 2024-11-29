@@ -5,6 +5,7 @@ import Footer from "../../components/Footer.astro";
 import Header from "../../components/Header.astro";
 import Calendar, { type RawCalendarEvent } from "../../components/calendar";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+import OpenInNewIcon from '../../assets/icons/external-link.astro'
 
 const events = await getCollection("events");
 ---
@@ -17,12 +18,22 @@ const events = await getCollection("events");
     <body>
         <Header />
         <main>
+            <div>
+                <a
+                    id="calendarDownload"
+                    href={`/events.ics`}
+                    download={"27th-colfax-calendar.ics"}
+                    target="_blank"
+                    >Add to your calendar:
+                    <OpenInNewIcon />
+                </a>
+            </div>
             <Calendar
                 client:only="react"
                 events={events.map((event) => ({
                     slug: event.slug,
                     title: event.data.title,
-                    data: event.data as RawCalendarEvent
+                    data: event.data as RawCalendarEvent,
                 }))}
             />
         </main>
