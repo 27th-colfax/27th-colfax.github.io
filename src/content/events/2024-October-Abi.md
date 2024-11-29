@@ -7,8 +7,8 @@ place:
     map: https://www.openstreetmap.org/way/124427176
     phone: '+16127210013'
     website: http://www.abismn.com/
-start: '2024-10-22T18:00:00'
-end: '2024-10-22T20:00:00'
+start: '2024-10-22T18:00-06:00'
+end: '2024-10-22T20:00-06:00'
 ---
 
 Come join the block for food and planning future events at Abi's!

@@ -5,8 +5,8 @@ place:
     name: David and Marge Krause's house
     address: '2716 Colfax Avenue South'
     map: https://www.openstreetmap.org/way/135350407
-start: '2024-12-07T10:00:00'
-end: '2024-12-07T12:00:00'
+start: '2024-12-07T10:00-06:00'
+end: '2024-12-07T12:00-06:00'
 ---
 
 In busy December, we want to have a morning coffee get together.  We will have coffee, tea, hot chocolate and some treats.
